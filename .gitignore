@@ -62,6 +62,10 @@ project.lock.json
 project.fragment.lock.json
 artifacts/
 
+# Local SQLite database and journal files
+ContosoDashboard.db
+ContosoDashboard.db-*
+
 # StyleCop
 StyleCopReport.xml
 

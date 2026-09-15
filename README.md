@@ -53,7 +53,7 @@ This application includes a **mock authentication system** designed for training
 
 ## Overview
 
-ContosoDashboard is built using ASP.NET Core 8.0 with Blazor Server and provides a centralized platform for:
+ContosoDashboard is built using ASP.NET Core 10.0 with Blazor Server and provides a centralized platform for:
 
 - Task management and tracking
 - Project oversight and collaboration
@@ -81,9 +81,9 @@ ContosoDashboard is built using ASP.NET Core 8.0 with Blazor Server and provides
 
 ### 🔧 Technical Stack
 
-- **Framework**: ASP.NET Core 8.0
+- **Framework**: ASP.NET Core 10.0
 - **UI**: Blazor Server
-- **Database**: SQL Server LocalDB with Entity Framework Core
+- **Database**: SQLite with Entity Framework Core (supports Windows ARM64)
 - **Authentication**: Cookie-based mock authentication for training (Azure AD/Microsoft Entra ID ready)
 - **Authorization**: Claims-based identity with role-based access control
 - **Styling**: Bootstrap 5.3 with Bootstrap Icons
@@ -97,12 +97,12 @@ ContosoDashboard is built using ASP.NET Core 8.0 with Blazor Server and provides
 This training application follows an **offline-first architecture** with abstraction layers that enable seamless migration to Azure services:
 
 **Current Implementation (Training/Offline):**
-- **Database**: SQL Server LocalDB (offline development database)
+- **Database**: SQLite (local database file; no database server installation required)
 - **File Storage**: Local filesystem for any file-based features
 - **Authentication**: Cookie-based mock authentication
 
 **Production Migration Path:**
-- **Database**: Azure SQL Database (replace connection string, no code changes)
+- **Database**: Azure SQL Database (switch EF Core provider and connection string, migrate data, and validate provider-specific behavior)
 - **File Storage**: Azure Blob Storage (swap `IFileStorageService` implementation)
 - **Authentication**: Microsoft Entra ID (replace authentication middleware)
 
@@ -137,8 +137,8 @@ public interface IFileStorageService
 
 ### Prerequisites
 
-- .NET 8.0 SDK or later
-- SQL Server LocalDB
+- .NET 10.0 SDK (use the ARM64 SDK on Windows ARM64)
+- SQLite is bundled with the application dependencies; no separate database installation is needed
 - Visual Studio 2022 or Visual Studio Code
 
 ### Quick Start
@@ -236,15 +236,17 @@ ContosoDashboard/
 
 ### Database Connection
 
-The default connection string in `appsettings.json` uses SQL Server LocalDB:
+The default connection string in `appsettings.json` uses SQLite:
 
 ```json
 "ConnectionStrings": {
-  "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=ContosoDashboard;Trusted_Connection=True;MultipleActiveResultSets=true"
+   "DefaultConnection": "Data Source=ContosoDashboard.db"
 }
 ```
 
-Update this if using a different SQL Server instance.
+The database file is created in the application's working directory (the inner `ContosoDashboard` directory when following the Quick Start). The directory must be writable. Use an absolute `Data Source` path to store the database elsewhere. Database and journal files are excluded from Git.
+
+On first startup, `EnsureCreated()` creates the SQLite schema and sample data. Existing SQL Server LocalDB data is not transferred or deleted; moving existing data requires a separate export/import. The SQLite native bundle is pinned to avoid the vulnerable older version brought in by EF Core 8.
 
 ### Production Authentication Guidance
 
@@ -351,12 +353,14 @@ The application includes pre-seeded data for testing:
 
 ### Database Issues
 
-**Option 1: Recreate via LocalDB**
+**Option 1: Recreate the SQLite database**
+
+Stop the application first. Back up the database if you need its contents: the following commands permanently delete local data. Run them from the inner `ContosoDashboard` directory when using the default connection string.
 
 ```powershell
-sqllocaldb stop mssqllocaldb
-sqllocaldb delete mssqllocaldb
-# Then run the application - database will be recreated automatically
+Remove-Item .\ContosoDashboard.db
+Remove-Item .\ContosoDashboard.db-wal, .\ContosoDashboard.db-shm, .\ContosoDashboard.db-journal -ErrorAction SilentlyContinue
+dotnet run
 ```
 
 **Option 2: Using EF Tools**
@@ -364,7 +368,7 @@ sqllocaldb delete mssqllocaldb
 - Delete database: `dotnet ef database drop --force`
 - Recreate: Run application (auto-creates with seed data)
 
-**Note**: The application uses `EnsureCreated()` for development, so just running `dotnet run` will automatically create and seed the database if it doesn't exist.
+**Note**: The application uses `EnsureCreated()` for development, so just running `dotnet run` will automatically create and seed the database if it doesn't exist. It does not update an existing database schema; model changes require migrations or an intentional reset of disposable training data.
 
 ## Security Concepts and Patterns
 
