@@ -9,11 +9,11 @@
 
 **Purpose**: Prepare test infrastructure, configuration, fixtures, and offline prerequisites.
 
-- [ ] T001 Create xUnit test project and reference the web project in `ContosoDashboard.Tests/ContosoDashboard.Tests.csproj`
-- [ ] T002 [P] Add temporary file-backed SQLite and private-storage test-host helpers in `ContosoDashboard.Tests/DocumentTestHost.cs`
-- [ ] T003 [P] Add fictional clean, macro-bearing, malformed, and encrypted Office fixture documentation in `ContosoDashboard.Tests/Fixtures/Office/README.md`
-- [ ] T004 [P] Document Microsoft Defender initial setup, disconnected execution, and Windows ARM64 readiness checks in `specs/001-document-management/quickstart.md`
-- [ ] T005 Add private storage root and Defender scanner settings without secrets in `ContosoDashboard/appsettings.json` and `ContosoDashboard/appsettings.Development.json`
+- [X] T001 Create xUnit test project and reference the web project in `ContosoDashboard.Tests/ContosoDashboard.Tests.csproj`
+- [X] T002 [P] Add temporary file-backed SQLite and private-storage test-host helpers in `ContosoDashboard.Tests/DocumentTestHost.cs`
+- [X] T003 [P] Add fictional clean, macro-bearing, malformed, and encrypted Office fixture documentation in `ContosoDashboard.Tests/Fixtures/Office/README.md`
+- [X] T004 [P] Document Microsoft Defender initial setup, disconnected execution, and Windows ARM64 readiness checks in `specs/001-document-management/quickstart.md`
+- [X] T005 Add private storage root and Defender scanner settings without secrets in `ContosoDashboard/appsettings.json` and `ContosoDashboard/appsettings.Development.json`
 
 ---
 
@@ -23,18 +23,18 @@
 
 **Critical**: Complete this phase before user-story work. It enforces offline operation and audit-before-action safety.
 
-- [ ] T006 Add Document, DocumentShare, TaskDocument, DocumentActivity, and DocumentRecoveryRecord entities using all constraints in `specs/001-document-management/data-model.md` in `ContosoDashboard/Models/Document.cs`, `ContosoDashboard/Models/DocumentShare.cs`, `ContosoDashboard/Models/TaskDocument.cs`, `ContosoDashboard/Models/DocumentActivity.cs`, and `ContosoDashboard/Models/DocumentRecoveryRecord.cs`
-- [ ] T007 Extend document/task/user relationships and document notification types/destinations in `ContosoDashboard/Models/User.cs`, `ContosoDashboard/Models/TaskItem.cs`, and `ContosoDashboard/Models/Notification.cs`
-- [ ] T008 Configure DbSets, relationships, retained audit history, active-share/task-link/path indexes, concurrency tokens, and recovery records in `ContosoDashboard/Data/ApplicationDbContext.cs`
-- [ ] T009 Create the EF Core migration and document existing-data upgrade/reset effects in `ContosoDashboard/Migrations/` and `specs/001-document-management/quickstart.md`
-- [ ] T010 [P] Define document requests/results and injected clock, storage, scanner, macro, audit, recovery, and document-service interfaces in `ContosoDashboard/Services/DocumentContracts.cs`
-- [ ] T011 [P] Implement current role, department, project membership, ownership, manager, Administrator, share-recipient, and former-member authorization in `ContosoDashboard/Services/DocumentAuthorizationService.cs`
-- [ ] T012 [P] Implement private-root validation, GUID staging/final paths, atomic moves, and deletion in `ContosoDashboard/Services/LocalFileStorageService.cs`
+- [X] T006 Add Document, DocumentShare, TaskDocument, DocumentActivity, and DocumentRecoveryRecord entities using all constraints in `specs/001-document-management/data-model.md` in `ContosoDashboard/Models/Document.cs`, `ContosoDashboard/Models/DocumentShare.cs`, `ContosoDashboard/Models/TaskDocument.cs`, `ContosoDashboard/Models/DocumentActivity.cs`, and `ContosoDashboard/Models/DocumentRecoveryRecord.cs`
+- [X] T007 Extend document/task/user relationships and document notification types/destinations in `ContosoDashboard/Models/User.cs`, `ContosoDashboard/Models/TaskItem.cs`, and `ContosoDashboard/Models/Notification.cs`
+- [X] T008 Configure DbSets, relationships, retained audit history, active-share/task-link/path indexes, concurrency tokens, and recovery records in `ContosoDashboard/Data/ApplicationDbContext.cs`
+- [X] T009 Create the EF Core migration and document existing-data upgrade/reset effects in `ContosoDashboard/Migrations/` and `specs/001-document-management/quickstart.md`
+- [X] T010 [P] Define document requests/results and injected clock, storage, scanner, macro, audit, recovery, and document-service interfaces in `ContosoDashboard/Services/DocumentContracts.cs`
+- [X] T011 [P] Implement current role, department, project membership, ownership, manager, Administrator, share-recipient, and former-member authorization in `ContosoDashboard/Services/DocumentAuthorizationService.cs`
+- [X] T012 [P] Implement private-root validation, GUID staging/final paths, atomic moves, and deletion in `ContosoDashboard/Services/LocalFileStorageService.cs`
 - [ ] T013 [P] Implement fail-closed allowed-content/type and OOXML/legacy Office macro inspection in `ContosoDashboard/Services/OfficeMacroInspector.cs`
-- [ ] T014 [P] Implement Windows Defender `MpCmdRun.exe` custom-file scanning with timeout and clean/threat/indeterminate results in `ContosoDashboard/Services/WindowsDefenderMalwareScanner.cs`
-- [ ] T015 Implement durable activity creation and transaction-aware audit persistence in `ContosoDashboard/Services/DocumentAuditService.cs`
-- [ ] T016 Implement startup and pre-operation storage reconciliation from durable recovery records in `ContosoDashboard/Services/DocumentRecoveryService.cs`
-- [ ] T017 Register document services, safely run recovery, and map authenticated private download/preview endpoint shells in `ContosoDashboard/Program.cs`
+- [X] T014 [P] Implement Windows Defender `MpCmdRun.exe` custom-file scanning with timeout and clean/threat/indeterminate results in `ContosoDashboard/Services/WindowsDefenderMalwareScanner.cs`
+- [X] T015 Implement durable activity creation and transaction-aware audit persistence in `ContosoDashboard/Services/DocumentAuditService.cs`
+- [X] T016 Implement startup and pre-operation storage reconciliation from durable recovery records in `ContosoDashboard/Services/DocumentRecoveryService.cs`
+- [X] T017 Register document services, safely run recovery, and map authenticated private download/preview endpoint shells in `ContosoDashboard/Program.cs`
 - [ ] T018 [P] Add entity configuration and migration integration tests in `ContosoDashboard.Tests/DocumentPersistenceTests.cs`
 - [ ] T019 [P] Add complete access-matrix and former-uploader authorization tests in `ContosoDashboard.Tests/DocumentAuthorizationTests.cs`
 - [ ] T020 [P] Add private storage path traversal, GUID, atomic-move, and cleanup tests in `ContosoDashboard.Tests/DocumentStorageRecoveryTests.cs`
@@ -179,6 +179,11 @@ Setup -> Foundational -> US1 (MVP) -> US2 -> US3 -> US4 -> US5 -> Polish
 **US5 tests**: T057 and T058 can run in parallel before T059-T061.
 
 ## Implementation Strategy
+
+**Phases**: Setup -> Foundation -> US1 only
+**Tasks**: T001 - T045 (45 tasks)
+**Estimated Time**: 6-8 hours for a developer familiar with ASP.NET Core/Blazor
+**Deliverable**: Users can upload and view their documents
 
 ### MVP First
 

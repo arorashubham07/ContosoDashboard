@@ -17,6 +17,11 @@ public class ApplicationDbContext : DbContext
     public DbSet<Notification> Notifications { get; set; } = null!;
     public DbSet<ProjectMember> ProjectMembers { get; set; } = null!;
     public DbSet<Announcement> Announcements { get; set; } = null!;
+    public DbSet<Document> Documents { get; set; } = null!;
+    public DbSet<DocumentShare> DocumentShares { get; set; } = null!;
+    public DbSet<TaskDocument> TaskDocuments { get; set; } = null!;
+    public DbSet<DocumentActivity> DocumentActivities { get; set; } = null!;
+    public DbSet<DocumentRecoveryRecord> DocumentRecoveryRecords { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -63,6 +68,25 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<User>()
             .HasIndex(u => u.Email)
             .IsUnique();
+
+        modelBuilder.Entity<Document>().Property(document => document.ConcurrencyToken).IsConcurrencyToken();
+        modelBuilder.Entity<Document>().HasIndex(document => document.FilePath).IsUnique();
+        modelBuilder.Entity<Document>().HasIndex(document => new { document.ProjectId, document.AvailabilityState, document.UploadedAtUtc });
+        modelBuilder.Entity<Document>().HasIndex(document => new { document.UploaderUserId, document.AvailabilityState, document.UploadedAtUtc });
+        modelBuilder.Entity<Document>().HasOne(document => document.Project).WithMany(project => project.Documents).HasForeignKey(document => document.ProjectId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<Document>().HasOne(document => document.Uploader).WithMany(user => user.UploadedDocuments).HasForeignKey(document => document.UploaderUserId).OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<DocumentShare>().HasCheckConstraint("CK_DocumentShares_OneRecipient", "(RecipientUserId IS NOT NULL AND RecipientDepartment IS NULL) OR (RecipientUserId IS NULL AND RecipientDepartment IS NOT NULL)");
+        modelBuilder.Entity<DocumentShare>().HasIndex(share => new { share.DocumentId, share.RecipientUserId, share.RecipientDepartment }).IsUnique();
+        modelBuilder.Entity<DocumentShare>().HasOne(share => share.RecipientUser).WithMany(user => user.DocumentShares).HasForeignKey(share => share.RecipientUserId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<DocumentShare>().HasOne(share => share.GrantedByUser).WithMany().HasForeignKey(share => share.GrantedByUserId).OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<TaskDocument>().HasIndex(link => new { link.TaskId, link.DocumentId }).IsUnique();
+        modelBuilder.Entity<TaskDocument>().HasOne(link => link.Document).WithMany(document => document.TaskDocuments).HasForeignKey(link => link.DocumentId).OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<TaskDocument>().HasOne(link => link.AttachedByUser).WithMany().HasForeignKey(link => link.AttachedByUserId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<DocumentActivity>().HasIndex(activity => new { activity.DocumentId, activity.OccurredAtUtc });
+        modelBuilder.Entity<DocumentActivity>().HasOne(activity => activity.ActorUser).WithMany(user => user.DocumentActivities).HasForeignKey(activity => activity.ActorUserId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<DocumentRecoveryRecord>().HasIndex(record => record.OperationId).IsUnique();
 
         // Seed initial data
         SeedData(modelBuilder);

@@ -3,6 +3,7 @@ using ContosoDashboard.Data;
 using ContosoDashboard.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,6 +44,14 @@ builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddSingleton<IClock, SystemClock>();
+builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
+builder.Services.AddScoped<IMalwareScanner, WindowsDefenderMalwareScanner>();
+builder.Services.AddScoped<IOfficeMacroInspector, OfficeMacroInspector>();
+builder.Services.AddScoped<IDocumentAuthorizationService, DocumentAuthorizationService>();
+builder.Services.AddScoped<IDocumentAuditService, DocumentAuditService>();
+builder.Services.AddScoped<IDocumentRecoveryService, DocumentRecoveryService>();
+builder.Services.AddScoped<IDocumentService, DocumentService>();
 
 // Add HttpContextAccessor for accessing user claims
 builder.Services.AddHttpContextAccessor();
@@ -56,7 +65,8 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = services.GetRequiredService<ApplicationDbContext>();
-        context.Database.EnsureCreated(); // For development - use migrations in production
+        context.Database.Migrate();
+        await services.GetRequiredService<IDocumentRecoveryService>().ReconcileAsync();
     }
     catch (Exception ex)
     {
@@ -104,6 +114,20 @@ app.UseRouting();
 // Enable authentication and authorization
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapGet("/documents/{documentId:int}/download", async (int documentId, ClaimsPrincipal user, IDocumentService documentService, CancellationToken cancellationToken) =>
+{
+    if (!int.TryParse(user.FindFirstValue(ClaimTypes.NameIdentifier), out var callerUserId)) return Results.NotFound();
+    var document = await documentService.PrepareDownloadAsync(callerUserId, documentId, false, cancellationToken);
+    return document is null ? Results.NotFound() : Results.File(document.Stream, document.ContentType, document.FileName);
+}).RequireAuthorization();
+
+app.MapGet("/documents/{documentId:int}/preview", async (int documentId, ClaimsPrincipal user, IDocumentService documentService, CancellationToken cancellationToken) =>
+{
+    if (!int.TryParse(user.FindFirstValue(ClaimTypes.NameIdentifier), out var callerUserId)) return Results.NotFound();
+    var document = await documentService.PrepareDownloadAsync(callerUserId, documentId, true, cancellationToken);
+    return document is null ? Results.NotFound() : Results.File(document.Stream, document.ContentType, enableRangeProcessing: true);
+}).RequireAuthorization();
 
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");

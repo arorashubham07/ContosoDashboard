@@ -23,6 +23,22 @@ dotnet run --project ContosoDashboard/ContosoDashboard.csproj
 
 Do not commit the generated SQLite database or uploads. For an intentional fresh training reset, stop the application, delete only the documented local database and private upload root, then restart so seed data is recreated. Never run a reset as part of normal startup or validation.
 
+## Database Migration Transition
+
+This feature introduces the first EF Core migration. Existing local databases were created with `EnsureCreated()` and do not contain migration history, so they cannot be upgraded in place. For the training environment only, stop the application, delete `ContosoDashboard/ContosoDashboard.db` and its `-wal`/`-shm` files, then start the application after the migration-aware startup change. This creates a fresh database with the seeded training data and document tables.
+
+Do not use this reset procedure for production data or as part of normal application startup.
+
+## Microsoft Defender Offline Readiness
+
+1. On the Windows ARM64 training image, open Windows Security and confirm real-time protection is enabled and virus definitions are current before disconnecting from the network.
+2. Run `Get-MpComputerStatus` in an elevated PowerShell session and confirm `AMServiceEnabled`, `AntivirusEnabled`, and `RealTimeProtectionEnabled` are `True`.
+3. Locate the platform scanner with `Get-ChildItem 'C:\ProgramData\Microsoft\Windows Defender\Platform' -Recurse -Filter MpCmdRun.exe`, then set `MalwareScanner:ExecutablePath` to that executable when the default path differs.
+4. Before offline validation, run `& $scanner -Scan -ScanType 3 -File <fictional-test-file>` against a harmless local test file and confirm the scanner exits successfully.
+5. Disconnect the training workstation and repeat the harmless scan. Record the Defender platform and definition versions, command result, and ARM64 device model with the validation evidence.
+
+The application treats a missing scanner, timeout, non-zero operational failure, or indeterminate result as unsafe and does not accept the upload.
+
 ## Validation Scenarios
 
 1. Upload 1, then 10, valid files as a project member. Verify per-file progress/outcomes, accepted metadata, exact private-file download, current project visibility, and no public static-file URL. Attempt 11 files and verify the whole selection is rejected before transfer.
