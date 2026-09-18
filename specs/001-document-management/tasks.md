@@ -146,7 +146,7 @@
 - [ ] T062 [P] Add 500-accessible/500-inaccessible document fixture seeding and timing tests in `ContosoDashboard.Tests/DocumentPerformanceTests.cs`
 - [ ] T063 [P] Record keyboard, labels, action-count, desktop, and mobile validation evidence in `specs/001-document-management/quickstart.md`
 - [ ] T064 [P] Record offline scanner, definition maintenance, macro-fixture, and no-cloud-runtime validation evidence in `specs/001-document-management/quickstart.md`
-- [ ] T065 Exclude upload paths, SQLite databases, scanner output, and training artifacts in `.gitignore`
+- [ ] T065 Exclude upload paths, SQLite databases, scanner output, and training artifacts in `./.gitignore`
 - [ ] T066 Run build and tests and record results in `specs/001-document-management/quickstart.md` using `dotnet build ContosoDashboard/ContosoDashboard.csproj` and `dotnet test ContosoDashboard.Tests/ContosoDashboard.Tests.csproj`
 - [ ] T067 Execute and record the complete acceptance, fault-injection, authorization, offline, and 20-trial performance workflow in `specs/001-document-management/quickstart.md`
 
